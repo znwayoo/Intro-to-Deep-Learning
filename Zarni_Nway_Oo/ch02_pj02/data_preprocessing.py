@@ -34,6 +34,12 @@ def preprocess_textinput(df, text_column):
     X = vectorizer.fit_transform(df['cleaned_text']).toarray()
     return X
 
+def preprocess_textinput_tfidf(df, text_column):    
+    vectorizer = TfidfVectorizer(max_features=5000)  
+    df['cleaned_text'] = df[text_column].apply(remove_special_characters)    
+    X = vectorizer.fit_transform(df['cleaned_text']).toarray()
+    return X
+
 def preprocess_category(df, column):
     df[column] = df[column].astype('category')
     df[column] = df[column].cat.codes
