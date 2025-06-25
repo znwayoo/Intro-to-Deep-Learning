@@ -222,29 +222,27 @@ class AutoSimilarityEvaluator:
         return results
     
     def generate_fuzzy_evaluation_report(self, results, dataset_name, save_path):
-        """Generate detailed fuzzy evaluation report"""
+        """Generate detailed fuzzy evaluation report in markdown format"""
         
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         
         with open(save_path, 'w') as f:
-            f.write(f"FUZZY EVALUATION REPORT\n")
-            f.write(f"Dataset: {dataset_name.upper()}\n")
-            f.write(f"Evaluation Method: Multi-Fuzzy Similarity Analysis\n")
-            f.write(f"{'='*60}\n\n")
+            f.write(f"# Fuzzy Evaluation Report\n\n")
+            f.write(f"**Dataset:** {dataset_name.upper()}  \n")
+            f.write(f"**Evaluation Method:** Multi-Fuzzy Similarity Analysis  \n\n")
+            f.write(f"---\n\n")
             
-            f.write("EVALUATION METHODOLOGY:\n")
-            f.write("-" * 25 + "\n")
-            f.write("• Exact Match: Identical predictions (100% score)\n")
-            f.write("• High Similarity: 60%+ fuzzy match (e.g., 'snow_leopard' vs 'leopard')\n")
-            f.write("• Medium Similarity: 30-60% fuzzy match (e.g., 'ice_bear' vs 'polar_bear')\n")
-            f.write("• Low Similarity: <30% fuzzy match (unrelated terms)\n\n")
+            f.write("## Evaluation Methodology\n\n")
+            f.write("- **Exact Match:** Identical predictions (100% score)\n")
+            f.write("- **High Similarity:** 60%+ fuzzy match (e.g., 'snow_leopard' vs 'leopard')\n")
+            f.write("- **Medium Similarity:** 30-60% fuzzy match (e.g., 'ice_bear' vs 'polar_bear')\n")
+            f.write("- **Low Similarity:** <30% fuzzy match (unrelated terms)\n\n")
             
-            f.write("FUZZY ACCURACY RESULTS:\n")
-            f.write("-" * 25 + "\n")
+            f.write("## Fuzzy Accuracy Results\n\n")
             
             # Create summary table
-            f.write(f"{'Model':<15} {'Exact Top-1':<12} {'Fuzzy Top-1':<12} {'Fuzzy Top-3':<12} {'Weighted Score':<15}\n")
-            f.write("-" * 70 + "\n")
+            f.write("| Model | Exact Top-1 | Fuzzy Top-1 | Fuzzy Top-3 | Weighted Score |\n")
+            f.write("|-------|-------------|-------------|-------------|----------------|\n")
             
             for model, result in results.items():
                 exact_top1 = result['exact_accuracy']['top1']
@@ -252,41 +250,42 @@ class AutoSimilarityEvaluator:
                 fuzzy_top3 = result['fuzzy_accuracy']['top3']
                 weighted_top1 = result['weighted_fuzzy_accuracy']['top1']
                 
-                f.write(f"{model:<15} {exact_top1:<12.1f} {fuzzy_top1:<12.1f} {fuzzy_top3:<12.1f} {weighted_top1:<15.1f}\n")
+                f.write(f"| {model} | {exact_top1:.1f}% | {fuzzy_top1:.1f}% | {fuzzy_top3:.1f}% | {weighted_top1:.1f}% |\n")
             
-            f.write("\n" + "="*60 + "\n\n")
+            f.write("\n---\n\n")
             
             # Detailed breakdown
-            f.write("DETAILED MODEL ANALYSIS:\n")
-            f.write("-" * 25 + "\n")
+            f.write("## Detailed Model Analysis\n\n")
             
             for model, result in results.items():
-                f.write(f"\n{model.upper()}:\n")
-                f.write(f"  Exact Accuracy: Top-1: {result['exact_accuracy']['top1']:.1f}%, "
-                       f"Top-2: {result['exact_accuracy']['top2']:.1f}%, "
-                       f"Top-3: {result['exact_accuracy']['top3']:.1f}%\n")
+                f.write(f"### {model.upper()}\n\n")
                 
-                f.write(f"  Fuzzy Accuracy: Top-1: {result['fuzzy_accuracy']['top1']:.1f}%, "
-                       f"Top-2: {result['fuzzy_accuracy']['top2']:.1f}%, "
-                       f"Top-3: {result['fuzzy_accuracy']['top3']:.1f}%\n")
+                f.write("**Exact Accuracy:**\n")
+                f.write(f"- Top-1: {result['exact_accuracy']['top1']:.1f}%\n")
+                f.write(f"- Top-2: {result['exact_accuracy']['top2']:.1f}%\n")
+                f.write(f"- Top-3: {result['exact_accuracy']['top3']:.1f}%\n\n")
                 
-                f.write(f"  Similarity Breakdown: "
-                       f"Exact: {result['similarity_breakdown']['exact']}, "
-                       f"High: {result['similarity_breakdown']['high']}, "
-                       f"Medium: {result['similarity_breakdown']['medium']}, "
-                       f"Low: {result['similarity_breakdown']['low']}\n")
+                f.write("**Fuzzy Accuracy:**\n")
+                f.write(f"- Top-1: {result['fuzzy_accuracy']['top1']:.1f}%\n")
+                f.write(f"- Top-2: {result['fuzzy_accuracy']['top2']:.1f}%\n")
+                f.write(f"- Top-3: {result['fuzzy_accuracy']['top3']:.1f}%\n\n")
+                
+                f.write("**Similarity Breakdown:**\n")
+                f.write(f"- Exact: {result['similarity_breakdown']['exact']}\n")
+                f.write(f"- High: {result['similarity_breakdown']['high']}\n")
+                f.write(f"- Medium: {result['similarity_breakdown']['medium']}\n")
+                f.write(f"- Low: {result['similarity_breakdown']['low']}\n\n")
             
-            f.write("\nRECOMMENDations:\n")
-            f.write("-" * 15 + "\n")
+            f.write("## Recommendations\n\n")
             
             # Find best performing models
             best_exact = max(results.items(), key=lambda x: x[1]['exact_accuracy']['top1'])
             best_fuzzy = max(results.items(), key=lambda x: x[1]['fuzzy_accuracy']['top1'])
             best_weighted = max(results.items(), key=lambda x: x[1]['weighted_fuzzy_accuracy']['top1'])
             
-            f.write(f"Best Exact Accuracy: {best_exact[0]} ({best_exact[1]['exact_accuracy']['top1']:.1f}%)\n")
-            f.write(f"Best Fuzzy Accuracy: {best_fuzzy[0]} ({best_fuzzy[1]['fuzzy_accuracy']['top1']:.1f}%)\n")
-            f.write(f"Best Weighted Score: {best_weighted[0]} ({best_weighted[1]['weighted_fuzzy_accuracy']['top1']:.1f}%)\n")
+            f.write(f"- **Best Exact Accuracy:** {best_exact[0]} ({best_exact[1]['exact_accuracy']['top1']:.1f}%)\n")
+            f.write(f"- **Best Fuzzy Accuracy:** {best_fuzzy[0]} ({best_fuzzy[1]['fuzzy_accuracy']['top1']:.1f}%)\n")
+            f.write(f"- **Best Weighted Score:** {best_weighted[0]} ({best_weighted[1]['weighted_fuzzy_accuracy']['top1']:.1f}%)\n")
 
 
 def run_fuzzy_evaluation(csv_file_path: str, dataset_name: str, results_base_dir: str = "./results"):
@@ -316,7 +315,7 @@ def run_fuzzy_evaluation(csv_file_path: str, dataset_name: str, results_base_dir
         reports_dir = os.path.join(results_dir, "reports")
         
         # Generate fuzzy evaluation report
-        report_path = os.path.join(reports_dir, f"{dataset_name}_fuzzy_evaluation_report.txt")
+        report_path = os.path.join(reports_dir, f"{dataset_name}_fuzzy_evaluation_report.md")
         evaluator.generate_fuzzy_evaluation_report(fuzzy_results, dataset_name, report_path)
         
         print(f"📊 Fuzzy evaluation completed!")

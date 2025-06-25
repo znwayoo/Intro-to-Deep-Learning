@@ -563,50 +563,48 @@ class CNNAnalyzer:
         return plot_files
     
     def generate_analysis_report(self, report_path: str, dataset_name: str):
-        """Generate text analysis report"""
+        """Generate markdown analysis report"""
         summary_df = self.create_summary_dataframe()
         
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(report_path), exist_ok=True)
         
         with open(report_path, 'w') as f:
-            f.write(f"CNN MODEL ANALYSIS REPORT\n")
-            f.write(f"Dataset: {dataset_name.upper()}\n")
-            f.write(f"Top-K Value: {self.top_k}\n")
-            f.write(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write(f"{'='*60}\n\n")
+            f.write(f"# CNN Model Analysis Report\n\n")
+            f.write(f"**Dataset:** {dataset_name.upper()}  \n")
+            f.write(f"**Top-K Value:** {self.top_k}  \n")
+            f.write(f"**Generated:** {time.strftime('%Y-%m-%d %H:%M:%S')}  \n\n")
+            f.write(f"---\n\n")
             
-            f.write("PERFORMANCE SUMMARY:\n")
-            f.write("-" * 20 + "\n")
+            f.write("## Performance Summary\n\n")
+            
+            # Create a performance summary table
+            f.write("| Model | Rank | Avg Confidence | Avg Time (s) | High Confidence % | Overall Score |\n")
+            f.write("|-------|------|----------------|--------------|-------------------|---------------|\n")
             
             for _, row in summary_df.iterrows():
-                f.write(f"{row['model']}:\n")
-                f.write(f"  Rank: #{row['rank']}\n")
-                f.write(f"  Avg Confidence: {row['avg_top1_confidence']:.3f}\n")
-                f.write(f"  Avg Time: {row['avg_time']:.3f}s\n")
-                f.write(f"  High Confidence %: {row['high_confidence_pct']:.1f}%\n")
-                f.write(f"  Overall Score: {row['overall_score']:.1f}\n\n")
+                f.write(f"| {row['model']} | #{row['rank']} | {row['avg_top1_confidence']:.3f} | {row['avg_time']:.3f} | {row['high_confidence_pct']:.1f}% | {row['overall_score']:.1f} |\n")
+            
+            f.write("\n")
             
             # InceptionV3 specific analysis
             inception_rows = summary_df[summary_df['model'] == 'InceptionV3']
             if not inception_rows.empty:
                 inception_row = inception_rows.iloc[0]
-                f.write("INCEPTIONV3 ANALYSIS:\n")
-                f.write("-" * 20 + "\n")
-                f.write(f"Rank: #{inception_row['rank']} out of {len(summary_df)} models\n")
-                f.write(f"Confidence Score: {inception_row['avg_top1_confidence']:.3f}\n")
-                f.write(f"Speed Performance: {inception_row['avg_time']:.3f}s average\n")
-                f.write(f"Reliability: {inception_row['high_confidence_pct']:.1f}% high confidence predictions\n")
+                f.write("## InceptionV3 Analysis\n\n")
+                f.write(f"- **Rank:** #{inception_row['rank']} out of {len(summary_df)} models\n")
+                f.write(f"- **Confidence Score:** {inception_row['avg_top1_confidence']:.3f}\n")
+                f.write(f"- **Speed Performance:** {inception_row['avg_time']:.3f}s average\n")
+                f.write(f"- **Reliability:** {inception_row['high_confidence_pct']:.1f}% high confidence predictions\n\n")
             
-            f.write("\nRECOMMENDATIONS:\n")
-            f.write("-" * 15 + "\n")
+            f.write("## Recommendations\n\n")
             best_model = summary_df.loc[summary_df['rank'] == 1, 'model'].iloc[0]
             fastest_model = summary_df.loc[summary_df['avg_time'].idxmin(), 'model']
             most_confident = summary_df.loc[summary_df['avg_top1_confidence'].idxmax(), 'model']
             
-            f.write(f"Best Overall: {best_model}\n")
-            f.write(f"Fastest: {fastest_model}\n")
-            f.write(f"Most Confident: {most_confident}\n")
+            f.write(f"- **Best Overall:** {best_model}\n")
+            f.write(f"- **Fastest:** {fastest_model}\n")
+            f.write(f"- **Most Confident:** {most_confident}\n")
 
 
 def analyze_predictions_and_save_results(csv_file_path: str, dataset_folder_name: str, results_base_dir: str = "./results"):
@@ -640,7 +638,7 @@ def analyze_predictions_and_save_results(csv_file_path: str, dataset_folder_name
             print(f"  - {plot_file}")
         
         # Generate analysis report
-        report_path = os.path.join(reports_dir, f"{dataset_folder_name}_analysis_report.txt")
+        report_path = os.path.join(reports_dir, f"{dataset_folder_name}_analysis_report.md")
         print(f"Generating analysis report...")
         analyzer.generate_analysis_report(report_path, dataset_folder_name)
         print(f"Generated analysis report: {report_path}")
