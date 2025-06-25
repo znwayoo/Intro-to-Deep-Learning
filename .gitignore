@@ -1,2 +1,39 @@
-**/__pycache?
+**/__pycache__/
 **/*.pyc
+
+# Dataset directories - exclude all image datasets
+**/dataset/
+**/datasets/
+
+# Results directories - exclude all generated results
+**/results/
+**/outputs/
+
+# Generated plots and visualizations
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.pdf
+
+# Generated reports and logs
+**/*_report.txt
+**/*_evaluation_report.txt
+**/*.log
+
+# Model files and weights (if any)
+**/*.h5
+**/*.pt
+**/*.pth
+**/*.pkl
+**/*.joblib
+
+# Claude Code generated files
+**/.claude/
+
+# Temporary files
+**/tmp/
+**/temp/
+**/*.tmp
+
+# OS generated files
+**/.DS_Store

@@ -1,5 +1,6 @@
 from classify_img import get_predictions
 from analysis_visualizer import analyze_predictions_and_save_results
+from fuzzy_evaluator import run_fuzzy_evaluation
 import os
 
 def run_prediction(name: str, image_dir: str, output_csv: str):
@@ -57,7 +58,20 @@ def run_prediction_with_analysis(name: str, image_dir: str, dataset_folder_name:
         print(f"✓ Generated {len(plot_files)} visualization plots")
         print(f"✓ Generated analysis report: {report_path}")
         
-        return results_df, results_dir, plot_files, report_path
+        # Run fuzzy evaluation
+        print("\n" + "=" * 60)
+        print(f"STEP 3: Running Fuzzy Similarity Evaluation")
+        print("=" * 60)
+        fuzzy_results, fuzzy_report_path = run_fuzzy_evaluation(
+            csv_file_path=output_csv,
+            dataset_name=dataset_folder_name,
+            results_base_dir="./results"
+        )
+        
+        print(f"✓ Fuzzy evaluation completed successfully!")
+        print(f"✓ Fuzzy evaluation report: {fuzzy_report_path}")
+        
+        return results_df, results_dir, plot_files, report_path, fuzzy_results, fuzzy_report_path
         
     except Exception as e:
         print(f"❌ Error during prediction and analysis: {str(e)}")
@@ -129,7 +143,7 @@ def run_multiple_datasets():
 
 def analyze_existing_csv(csv_file_path: str, dataset_folder_name: str):
     """
-    Analyze existing CSV file and generate visualizations
+    Analyze existing CSV file and generate visualizations with fuzzy evaluation
     
     Args:
         csv_file_path: Path to existing CSV file with predictions
@@ -144,21 +158,35 @@ def analyze_existing_csv(csv_file_path: str, dataset_folder_name: str):
         if not os.path.exists(csv_file_path):
             raise FileNotFoundError(f"CSV file not found: {csv_file_path}")
         
-        # Run analysis
+        # Step 1: Run standard analysis
+        print("🔍 STEP 1: Running Standard Analysis and Visualizations")
+        print("-" * 40)
         results_dir, plot_files, report_path = analyze_predictions_and_save_results(
             csv_file_path=csv_file_path,
             dataset_folder_name=dataset_folder_name,
             results_base_dir="./results"
         )
         
-        print(f"✅ Analysis completed successfully!")
+        print(f"✅ Standard analysis completed!")
         print(f"📁 Results directory: {results_dir}")
         print(f"📊 Generated {len(plot_files)} visualization plots:")
         for plot_file in plot_files:
             print(f"   - {os.path.basename(plot_file)}")
         print(f"📋 Analysis report: {report_path}")
         
-        return results_dir, plot_files, report_path
+        # Step 2: Run fuzzy evaluation
+        print(f"\n🔍 STEP 2: Running Fuzzy Similarity Evaluation")
+        print("-" * 40)
+        fuzzy_results, fuzzy_report_path = run_fuzzy_evaluation(
+            csv_file_path=csv_file_path,
+            dataset_name=dataset_folder_name,
+            results_base_dir="./results"
+        )
+        
+        print(f"✅ Fuzzy evaluation completed!")
+        print(f"📋 Fuzzy evaluation report: {fuzzy_report_path}")
+        
+        return results_dir, plot_files, report_path, fuzzy_results, fuzzy_report_path
         
     except Exception as e:
         print(f"❌ Error analyzing CSV: {str(e)}")
@@ -182,12 +210,12 @@ def main():
 
 if __name__ == "__main__":
     # Run single dataset
-    main()
+    # main()
     
     # Run multiple datasets
     # run_multiple_datasets()
     
     #Analyze existing .csv files
     # analyze_existing_csv("./results/mammals_result.csv", "mammals")
-    # analyze_existing_csv("./results/mmculture/mmculture_predictions.csv", "mmculture")
+    analyze_existing_csv("./results/blurry_noisy/blurry_noisy_predictions.csv", "blurry_noisy")
     
