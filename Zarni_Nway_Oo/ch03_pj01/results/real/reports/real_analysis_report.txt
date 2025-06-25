@@ -1,0 +1,54 @@
+CNN MODEL ANALYSIS REPORT
+Dataset: REAL
+Generated: 2025-06-25 20:01:12
+============================================================
+
+PERFORMANCE SUMMARY:
+--------------------
+ResNet50:
+  Rank: #1
+  Avg Confidence: 0.617
+  Avg Time: 0.078s
+  High Confidence %: 20.0%
+  Overall Score: 98.1
+
+VGGNet16:
+  Rank: #2
+  Avg Confidence: 0.552
+  Avg Time: 0.084s
+  High Confidence %: 30.0%
+  Overall Score: 71.8
+
+InceptionV3:
+  Rank: #3
+  Avg Confidence: 0.472
+  Avg Time: 0.076s
+  High Confidence %: 20.0%
+  Overall Score: 50.0
+
+ConvNeXt:
+  Rank: #4
+  Avg Confidence: 0.590
+  Avg Time: 0.315s
+  High Confidence %: 20.0%
+  Overall Score: 44.9
+
+EfficientNet:
+  Rank: #5
+  Avg Confidence: 0.521
+  Avg Time: 0.447s
+  High Confidence %: 0.0%
+  Overall Score: 16.8
+
+INCEPTIONV3 ANALYSIS:
+--------------------
+Rank: #3 out of 5 models
+Confidence Score: 0.472
+Speed Performance: 0.076s average
+Reliability: 20.0% high confidence predictions
+
+RECOMMENDATIONS:
+---------------
+Best Overall: ResNet50
+Fastest: InceptionV3
+Most Confident: ResNet50
