@@ -1,0 +1,2 @@
+Train_Accuracy,Test_Accuracy,Train_Precision,Test_Precision,Train_Recall,Test_Recall,Train_F1_Score,Test_F1_Score,Training_Time
+0.8185,0.3553,0.8215,0.3585,0.8185,0.3553,0.8176,0.3523,14.388
