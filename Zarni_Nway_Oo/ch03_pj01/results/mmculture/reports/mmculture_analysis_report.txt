@@ -1,6 +1,7 @@
 CNN MODEL ANALYSIS REPORT
 Dataset: MMCULTURE
-Generated: 2025-06-25 19:52:27
+Top-K Value: 3
+Generated: 2025-06-25 22:51:30
 ============================================================
 
 PERFORMANCE SUMMARY:

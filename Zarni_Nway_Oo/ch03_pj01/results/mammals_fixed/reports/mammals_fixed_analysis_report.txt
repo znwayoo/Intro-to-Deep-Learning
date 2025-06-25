@@ -1,7 +1,7 @@
 CNN MODEL ANALYSIS REPORT
-Dataset: MAMMALS
+Dataset: MAMMALS_FIXED
 Top-K Value: 3
-Generated: 2025-06-25 23:37:55
+Generated: 2025-06-25 23:45:44
 ============================================================
 
 PERFORMANCE SUMMARY:

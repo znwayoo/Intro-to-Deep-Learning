@@ -37,14 +37,14 @@ def get_predictions(image_dir, k=1):
                 model_end_time = time.time()
                 
                 model_time = model_end_time - model_start_time
-                timing_data.append(model_time)
+                timing_data.append(round(model_time, 2))
                 for pred in preds:
                     row_data.append(pred[1]) #class name
                     row_data.append(pred[2]) #probability  
         
             row_data.extend(timing_data)
             total_time = time.time() - total_start_time
-            row_data.append(total_time)
+            row_data.append(round(total_time, 2))
             
             result_rows.append(row_data)
 

@@ -89,6 +89,16 @@ class CNNAnalyzer:
         
         for model in self.models:
             if model not in model_data:
+                # Add default empty metrics for missing models
+                metrics.append({
+                    'model': model,
+                    'avg_top1_confidence': 0.0,
+                    'avg_all_confidence': 0.0,
+                    'std_top1_confidence': 0.0,
+                    'high_confidence_pct': 0.0,
+                    'low_confidence_pct': 0.0,
+                    'total_predictions': 0
+                })
                 continue
                 
             data = model_data[model]
@@ -133,15 +143,12 @@ class CNNAnalyzer:
                 min_time = times.min()
                 max_time = times.max()
             else:
-                # Fallback to simulated data
-                simulated_times = {
-                    'ResNet50': 0.045, 'VGGNet16': 0.032, 'InceptionV3': 0.058,
-                    'ConvNeXt': 0.072, 'EfficientNet': 0.089
-                }
-                avg_time = simulated_times[model]
-                std_time = avg_time * 0.2
-                min_time = avg_time * 0.8
-                max_time = avg_time * 1.2
+                # Set default values for missing timing data
+                print(f"⚠️  Warning: No timing data found for {model}, using default values")
+                avg_time = 1.0  # Default 1 second
+                std_time = 0.1
+                min_time = 0.9
+                max_time = 1.1
             
             timing_metrics.append({
                 'model': model,
@@ -160,6 +167,16 @@ class CNNAnalyzer:
         
         for model in self.models:
             if model not in model_data:
+                # Add default confidence metrics for missing models
+                confidence_metrics.append({
+                    'model': model,
+                    'mean_confidence': 0.0,
+                    'median_confidence': 0.0,
+                    'q25_confidence': 0.0,
+                    'q75_confidence': 0.0,
+                    'min_confidence': 0.0,
+                    'max_confidence': 0.0
+                })
                 continue
                 
             data = model_data[model]
@@ -183,18 +200,27 @@ class CNNAnalyzer:
         timing_metrics = self.calculate_timing_metrics()
         conf_metrics = self.calculate_confidence_metrics()
         
-        # Merge all metrics
-        summary = perf_metrics.merge(timing_metrics, on='model')
-        summary = summary.merge(conf_metrics, on='model')
+        # Merge all metrics using left join to preserve all models
+        summary = perf_metrics.merge(timing_metrics, on='model', how='left')
+        summary = summary.merge(conf_metrics, on='model', how='left')
         
-        # Calculate overall score (normalized)
-        summary['speed_score'] = 1 / summary['avg_time']  # Higher is better
+        # Fill any missing values with reasonable defaults
+        summary['avg_time'] = summary['avg_time'].fillna(1.0)  # Default 1 second
+        summary = summary.fillna(0)
+        
+        # Calculate overall score (normalized) - protect against division by zero
+        summary['speed_score'] = 1 / summary['avg_time'].replace(0, 1.0)  # Higher is better
         summary['confidence_score'] = summary['avg_top1_confidence']
         
-        # Normalize scores to 0-100
+        # Normalize scores to 0-100 (handle division by zero)
         for col in ['speed_score', 'confidence_score']:
-            summary[f'{col}_normalized'] = ((summary[col] - summary[col].min()) / 
-                                          (summary[col].max() - summary[col].min())) * 100
+            col_min = summary[col].min()
+            col_max = summary[col].max()
+            if col_max - col_min > 0:  # Avoid division by zero
+                summary[f'{col}_normalized'] = ((summary[col] - col_min) / 
+                                              (col_max - col_min)) * 100
+            else:
+                summary[f'{col}_normalized'] = 50  # Default middle value if all same
         
         # Calculate overall rank
         summary['overall_score'] = (summary['speed_score_normalized'] + 
@@ -273,7 +299,7 @@ class CNNAnalyzer:
         ax.set_title('CNN Model Performance Comparison', fontsize=14, fontweight='bold')
         ax.set_xticks(x)
         ax.set_xticklabels(summary_df['model'], rotation=45)
-        ax.legend(loc='upper left', fontsize=10)
+        ax.legend(loc='upper right', fontsize=10)
         ax.grid(True, alpha=0.3, axis='y')  # Only horizontal grid lines
         
         # Set y-axis limit to accommodate labels
@@ -304,7 +330,7 @@ class CNNAnalyzer:
         std_times = np.array(timing_df['std_time'].values, dtype=float)
         
         bars = ax.barh(timing_df['model'], avg_times, 
-                      xerr=std_times, color=colors, alpha=0.8)
+                      color=colors, alpha=0.8)
         
         # Highlight InceptionV3
         for i, model in enumerate(timing_df['model']):
@@ -393,16 +419,28 @@ class CNNAnalyzer:
         ax1.set_title('InceptionV3 Top-1 Confidence Distribution')
         ax1.grid(True, alpha=0.3)
         
-        # Panel 2: Top-K accuracy simulation
-        top_k_acc = [85.2, 92.1, 95.8][:self.top_k]  # Adjust to actual top_k
-        k_values = list(range(1, self.top_k + 1))
-        ax2.plot(k_values, top_k_acc, 'o-', color=self.inception_color, 
-                linewidth=3, markersize=8)
-        ax2.set_xlabel('Top-K')
-        ax2.set_ylabel('Accuracy (%)')
-        ax2.set_title('InceptionV3 Top-K Performance')
-        ax2.grid(True, alpha=0.3)
-        ax2.set_xticks(k_values)
+        # Panel 2: Top-K confidence comparison
+        k_values = []
+        avg_confidences = []
+        
+        for k in range(1, self.top_k + 1):
+            if f'top{k}_probs' in inception_data:
+                topk_probs = np.array(inception_data[f'top{k}_probs'], dtype=float)
+                k_values.append(k)
+                avg_confidences.append(np.mean(topk_probs))
+        
+        if k_values:
+            ax2.plot(k_values, avg_confidences, 'o-', color=self.inception_color, 
+                    linewidth=3, markersize=8)
+            ax2.set_xlabel('Top-K Rank')
+            ax2.set_ylabel('Average Confidence')
+            ax2.set_title('InceptionV3 Average Confidence by Rank')
+            ax2.grid(True, alpha=0.3)
+            ax2.set_xticks(k_values)
+        else:
+            ax2.text(0.5, 0.5, 'No Top-K data available', ha='center', va='center', 
+                    transform=ax2.transAxes, fontsize=12)
+            ax2.set_title('InceptionV3 Top-K Analysis (No Data)')
         
         # Panel 3: Confidence by prediction rank (flexible for any top_k)
         rank_data = [top1_probs]
