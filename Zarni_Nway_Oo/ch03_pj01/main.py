@@ -216,6 +216,7 @@ if __name__ == "__main__":
     # run_multiple_datasets()
     
     #Analyze existing .csv files
-    analyze_existing_csv("./results/mammals/mammals_predictions.csv", "mammals")
-    analyze_existing_csv("./results/mmculture/mmculture_predictions.csv", "mmculture")
+    # analyze_existing_csv("./results/mammals/mammals_predictions.csv", "mammals")
+    # analyze_existing_csv("./results/mmculture/mmculture_predictions.csv", "mmculture")
+    analyze_existing_csv("./results/blurry_noisy/blurry_noisy_predictions.csv", "blurry_noisy")
     
