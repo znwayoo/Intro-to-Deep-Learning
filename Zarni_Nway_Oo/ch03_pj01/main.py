@@ -94,11 +94,11 @@ def run_multiple_datasets():
             "image_dir": "./dataset/blurry_noisy/",
             "folder_name": "blurry_noisy"
         },
-        # {
-        #     "name": "Fish",
-        #     "image_dir": "./dataset/fish/",
-        #     "folder_name": "fish"
-        # }
+        {
+            "name": "MMCulture",
+            "image_dir": "./dataset/mmculture/",
+            "folder_name": "mmculture"
+        },
     ]
     
     all_results = {}
@@ -213,9 +213,9 @@ if __name__ == "__main__":
     # main()
     
     # Run multiple datasets
-    run_multiple_datasets()
+    # run_multiple_datasets()
     
     #Analyze existing .csv files
-    # analyze_existing_csv("./results/mammals_result.csv", "mammals")
-    # analyze_existing_csv("./results/blurry_noisy/blurry_noisy_predictions.csv", "blurry_noisy")
+    analyze_existing_csv("./results/mammals/mammals_predictions.csv", "mammals")
+    analyze_existing_csv("./results/mmculture/mmculture_predictions.csv", "mmculture")
     

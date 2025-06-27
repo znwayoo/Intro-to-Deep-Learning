@@ -177,8 +177,8 @@ class AutoSimilarityEvaluator:
                     # Check if ground truth is in top-k predictions so far
                     if ground_truth in top_k_predictions:
                         model_results['exact_accuracy'][f'top{k}'] += 1
-                        model_results['fuzzy_accuracy'][f'top{k}'] += 1.0
-                        model_results['weighted_fuzzy_accuracy'][f'top{k}'] += 1.0
+                        model_results['fuzzy_accuracy'][f'top{k}'] += 1.0 #type: ignore
+                        model_results['weighted_fuzzy_accuracy'][f'top{k}'] += 1.0 #type: ignore
                         found_any_match = True
                         best_similarity_category = 'exact'
                     else:
@@ -194,8 +194,8 @@ class AutoSimilarityEvaluator:
                             similarity_category = self.categorize_similarity(best_fuzzy_score)
                             
                             if similarity_category in ['high', 'medium']:
-                                model_results['fuzzy_accuracy'][f'top{k}'] += 1.0
-                                model_results['weighted_fuzzy_accuracy'][f'top{k}'] += best_fuzzy_score
+                                model_results['fuzzy_accuracy'][f'top{k}'] += 1.0 #type: ignore
+                                model_results['weighted_fuzzy_accuracy'][f'top{k}'] += best_fuzzy_score #type: ignore
                                 found_any_match = True
                                 if similarity_category == 'high' or best_similarity_category == 'low':
                                     best_similarity_category = similarity_category
@@ -209,11 +209,11 @@ class AutoSimilarityEvaluator:
             # Convert to percentages
             for metric in ['exact_accuracy', 'fuzzy_accuracy']:
                 for k in ['top1', 'top2', 'top3']:
-                    model_results[metric][k] = (model_results[metric][k] / total_samples) * 100
+                    model_results[metric][k] = (model_results[metric][k] / total_samples) * 100 #type: ignore
             
             # Weighted fuzzy accuracy (average similarity score)
             for k in ['top1', 'top2', 'top3']:
-                model_results['weighted_fuzzy_accuracy'][k] = (
+                model_results['weighted_fuzzy_accuracy'][k] = ( #type: ignore
                     model_results['weighted_fuzzy_accuracy'][k] / total_samples
                 ) * 100
             

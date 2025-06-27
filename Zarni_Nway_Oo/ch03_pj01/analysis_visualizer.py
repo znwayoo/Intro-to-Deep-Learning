@@ -369,7 +369,8 @@ class CNNAnalyzer:
                 model_names.append(model)
         
         # Create box plot
-        bp = ax.boxplot(confidence_data, patch_artist=True)
+        bp = ax.boxplot(confidence_data, patch_artist=True,
+                        medianprops={'color': 'black', 'linewidth': 1.5})
         
         # Set x-axis labels manually
         ax.set_xticklabels(model_names, rotation=45)
@@ -452,7 +453,8 @@ class CNNAnalyzer:
                 rank_data.append(topk_probs)
                 rank_labels.append(f'Top-{k}')
         
-        ax3.boxplot(rank_data, patch_artist=True, labels=rank_labels)
+        ax3.boxplot(rank_data, patch_artist=True, labels=rank_labels,
+                    medianprops={'color': 'black', 'linewidth': 1.5})
         ax3.set_ylabel('Confidence Score')
         ax3.set_title('InceptionV3 Confidence by Prediction Rank')
         ax3.grid(True, alpha=0.3)
